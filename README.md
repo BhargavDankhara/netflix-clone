@@ -12,7 +12,7 @@
 > Awesome Landing Page </br>
 
 
-Setup .env file </br>
+<b>Setup .env file</b> </br>
 PORT=5000 </br>
 MONGO_URI=your_mongo_uri </br>
 NODE_ENV=development </br>
