@@ -9,30 +9,33 @@ export async function signup(req, res) {
     if (!email || !password || !username) {
       return res
         .status(400)
-        .json({ success: false, message: "all fielda ar require" });
+        .json({ success: false, message: "All fields are required" });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (emailRegex.test(email)) {
+    if (!emailRegex.test(email)) {
       return res.status(400).json({ success: false, message: "Invalid email" });
     }
+
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 6 characters long",
+        message: "Password must be at least 6 characters",
       });
     }
 
     const existingUserByEmail = await User.findOne({ email: email });
+
     if (existingUserByEmail) {
       return res
         .status(400)
         .json({ success: false, message: "Email already exists" });
     }
 
-    const existingUserByUserName = await User.findOne({ username: username });
-    if (existingUserByUserName) {
+    const existingUserByUsername = await User.findOne({ username: username });
+
+    if (existingUserByUsername) {
       return res
         .status(400)
         .json({ success: false, message: "Username already exists" });
@@ -42,6 +45,7 @@ export async function signup(req, res) {
     const hashedPassword = await bcryptjs.hash(password, salt);
 
     const PROFILE_PICS = ["/avatar1.png", "/avatar2.png", "/avatar3.png"];
+
     const image = PROFILE_PICS[Math.floor(Math.random() * PROFILE_PICS.length)];
 
     const newUser = new User({
@@ -53,11 +57,16 @@ export async function signup(req, res) {
 
     generateTokenAndSetCookie(newUser._id, res);
     await newUser.save();
-    res
-      .status(201)
-      .json({ success: true, user: { ...newUser._doc, password: "" } });
+
+    res.status(201).json({
+      success: true,
+      user: {
+        ...newUser._doc,
+        password: "",
+      },
+    });
   } catch (error) {
-    console.log("error in signup controller", error.message);
+    console.log("Error in signup controller", error.message);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
@@ -80,6 +89,7 @@ export async function login(req, res) {
     }
 
     const isPasswordCorrect = await bcryptjs.compare(password, user.password);
+
     if (!isPasswordCorrect) {
       return res
         .status(400)
@@ -87,6 +97,7 @@ export async function login(req, res) {
     }
 
     generateTokenAndSetCookie(user._id, res);
+
     res.status(200).json({
       success: true,
       user: {
@@ -95,7 +106,7 @@ export async function login(req, res) {
       },
     });
   } catch (error) {
-    console.log("error in login controller", error.message);
+    console.log("Error in login controller", error.message);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
@@ -105,7 +116,17 @@ export async function logout(req, res) {
     res.clearCookie("jwt-netflix");
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
-    console.log("error in logout", error.message);
-    res.send(500).json({ success: false, message: "Internal server error" });
+    console.log("Error in logout controller", error.message);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+export async function authCheck(req, res) {
+  try {
+    console.log("req.user:", req.user);
+    res.status(200).json({ success: true, user: req.user });
+  } catch (error) {
+    console.log("Error in authCheck controller", error.message);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
