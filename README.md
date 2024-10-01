@@ -1,5 +1,5 @@
 ﻿# netflix-clone
-# Was not able to complet the complete websit on time.
+# Was not able to complet the websit on time.
 
 > Tech Stack: React.js, Node.js, Express.js, MongoDB, Tailwind
 > Authentication with JWT
